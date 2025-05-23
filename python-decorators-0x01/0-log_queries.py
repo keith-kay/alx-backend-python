@@ -23,3 +23,4 @@ def log_queries():
         return wrapper
     return decorator
 
+
