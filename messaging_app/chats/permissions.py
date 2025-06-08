@@ -1,11 +1,18 @@
 from rest_framework import permissions
 
-class IsOwnerOrReadOnly(permissions.BasePermission):
+class IsParticipantOfConversation(permissions.BasePermission):
     """
-    Custom permission to only allow owners of an object to view or edit it.
-    Assumes the model instance has a `user` or `owner` attribute.
+    Allows access only to authenticated participants of a conversation.
     """
 
+    def has_permission(self, request, view):
+        # Only allow access to authenticated users
+        return request.user and request.user.is_authenticated
+
     def has_object_permission(self, request, view, obj):
-        # Read permissions are allowed to the owner only.
-        return obj.user == request.user or getattr(obj, 'owner', None) == request.user
+        # If obj is a Message, get its conversation
+        conversation = getattr(obj, 'conversation', obj)
+        # Only allow participants to view, send, update, or delete messages
+        if request.method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']:
+            return request.user in conversation.participants.all()
+        return False
