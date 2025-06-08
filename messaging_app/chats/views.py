@@ -1,3 +1,5 @@
 from django.shortcuts import render
+from .permissions import IsParticipantOfConversation
 
-# Create your views here.
+class MessageViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsParticipantOfConversation]
