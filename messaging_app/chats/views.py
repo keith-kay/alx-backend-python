@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from .models import Message, Conversation
 from .serializers import MessageSerializer
 from .permissions import IsParticipantOfConversation
+from rest_framework.pagination import PageNumberPagination
 
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
@@ -33,3 +34,8 @@ class MessageViewSet(viewsets.ModelViewSet):
         if request.user not in conversation.participants.all():
             return Response({'detail': 'Forbidden.'}, status=status.HTTP_403_FORBIDDEN)
         return super().create(request, *args, **kwargs)
+    
+class MessagePagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
