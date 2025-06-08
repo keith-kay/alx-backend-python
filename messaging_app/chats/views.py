@@ -2,11 +2,16 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Message, Conversation
-from .serializers import MessageSerializer
+from .serializers import MessageSerializer, ConversationSerializer
 from .permissions import IsParticipantOfConversation
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import MessageFilter
+
+class MessagePagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
@@ -39,8 +44,20 @@ class MessageViewSet(viewsets.ModelViewSet):
         if request.user not in conversation.participants.all():
             return Response({'detail': 'Forbidden.'}, status=status.HTTP_403_FORBIDDEN)
         return super().create(request, *args, **kwargs)
-    
-class MessagePagination(PageNumberPagination):
-    page_size = 20
-    page_size_query_param = 'page_size'
-    max_page_size = 100
+
+class ConversationViewSet(viewsets.ModelViewSet):
+    serializer_class = ConversationSerializer
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+
+    def get_queryset(self):
+        return Conversation.objects.filter(participants=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        participants = request.data.get('participants')
+        if not participants or len(participants) < 2:
+            return Response({'detail': 'At least two participants are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        conversation = Conversation.objects.create()
+        conversation.participants.set(participants)
+        conversation.save()
+        serializer = self.get_serializer(conversation)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
