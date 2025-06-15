@@ -53,3 +53,29 @@ def message_detail(request, message_id):
         "message": message,
         "thread": thread
     })
+
+class UnreadMessageManager(models.Manager):
+    def unread_for_user(self, user):
+        return self.filter(receiver=user, unread=True)
+
+class Message(models.Model):
+    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    parent_message = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        related_name='replies',
+        on_delete=models.CASCADE
+    )
+    unread = models.BooleanField(default=True)
+
+    objects = models.Manager()  # Default manager
+    unread = UnreadMessageManager()  # Custom manager for unread messages
+
+@login_required
+def inbox(request):
+    unread_messages = Message.unread.unread_for_user(request.user)
+    return render(request, "messaging/inbox.html", {"unread_messages": unread_messages})

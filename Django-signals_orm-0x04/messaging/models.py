@@ -13,7 +13,7 @@ class Message(models.Model):
         related_name='replies',
         on_delete=models.CASCADE
     )
-
+    unread = models.BooleanField(default=True)
 class Notification(models.Model):
     user = models.ForeignKey(User, related_name='notifications', on_delete=models.CASCADE)
     message = models.ForeignKey(Message, related_name='notifications', on_delete=models.CASCADE)
