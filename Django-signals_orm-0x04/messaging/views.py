@@ -81,3 +81,9 @@ def inbox(request):
         "id", "sender", "content", "timestamp"
     )
     return render(request, "messaging/inbox.html", {"unread_messages": unread_messages})
+
+@cache_page(60)  # Cache for 5 minutes
+@login_required
+def conversation_messages(request, conversation_id):
+    messages = Message.objects.filter(parent_message_id=conversation_id).select_related('sender', 'receiver').order_by('timestamp')
+    return render(request, "messaging/conversation_messages.html", {"messages": messages})
