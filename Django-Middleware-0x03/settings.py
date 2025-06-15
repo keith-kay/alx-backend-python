@@ -54,7 +54,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'chats.middleware.RequestLoggingMiddleware',
-    'chats.middleware.RestrictAccessByTimeMiddleware'  # Custom middleware for restricting access by time
+    'chats.middleware.RestrictAccessByTimeMiddleware',
+    'chats.middleware.OffensiveLanguageMiddleware'  # Custom middleware for restricting access by time
 ]
 
 ROOT_URLCONF = 'messaging_app.urls'
