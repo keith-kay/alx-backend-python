@@ -1,0 +1,17 @@
+#!/bin/bash
+# kubctl-0x02: Blue-Green deployment and log check for Django app
+
+# Deploy blue version (current)
+kubectl apply -f blue_deployment.yaml
+
+# Deploy green version (new)
+kubectl apply -f green_deployment.yaml
+
+# Apply the service to switch traffic (update selector as needed)
+kubectl apply -f kubeservice.yaml
+
+# Check logs for green deployment pods
+echo "Logs for green deployment pods:"
+kubectl get pods -l app=messaging-app-green -o name | while read pod; do
+    kubectl logs "$pod"
+done
