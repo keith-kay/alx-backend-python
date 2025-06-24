@@ -1,0 +1,17 @@
+#!/bin/bash
+# kubctl-0x01: Scale Django deployment, verify pods, load test, and monitor resources
+
+# Scale the deployment to 3 replicas
+kubectl scale deployment messaging-app-deployment --replicas=3
+
+# Verify that multiple pods are running
+echo "Current pods:"
+kubectl get pods
+
+# Perform load testing using wrk (ensure wrk is installed and ClusterIP is port-forwarded)
+echo "Starting load test with wrk (make sure port 8000 is accessible)..."
+wrk -t4 -c100 -d10s http://localhost:8000/
+
+# Monitor resource usage
+echo "Resource usage:"
+kubectl top pods
