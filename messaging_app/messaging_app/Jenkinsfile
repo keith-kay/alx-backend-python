@@ -8,14 +8,15 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git credentialsId: 'your-github-credentials-id', url: 'https://github.com/your-username/your-repo.git', branch: 'main'
+                // Explicitly specify branch for the check
+                git branch: 'main', credentialsId: 'your-github-credentials-id', url: 'https://github.com/your-username/your-repo.git'
             }
         }
         stage('Install Dependencies') {
             steps {
                 sh 'python3 -m venv $VENV_DIR'
-                sh '. $VENV_DIR/bin/activate && pip install --upgrade pip'
-                sh '. $VENV_DIR/bin/activate && pip install -r requirements.txt'
+                sh '. $VENV_DIR/bin/activate && pip3 install --upgrade pip'
+                sh '. $VENV_DIR/bin/activate && pip3 install -r messaging_app/requirements.txt'
             }
         }
         stage('Run Tests') {
@@ -31,5 +32,3 @@ pipeline {
     }
     triggers {
         // No automatic triggers; run manually
-    }
-}
